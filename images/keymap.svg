@@ -1,0 +1,227 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 960" width="660">
+<style>
+  rect.key { fill: #f6f8fa; stroke: #c9cccf; stroke-width: 1; rx: 6; ry: 6; }
+  rect.hold-tap { fill: #e8f4fd; stroke: #a8c8e8; stroke-width: 1; rx: 6; ry: 6; }
+  rect.trans { fill: none; stroke: #d8d8d8; stroke-width: 1; stroke-dasharray: 3 2; rx: 6; ry: 6; }
+  rect.disabled { fill: #f0f0f0; stroke: #e4e4e4; stroke-width: 1; rx: 6; ry: 6; }
+  text.tap { font-family: "SF Mono", "Cascadia Code", Consolas, monospace; font-size: 13px; fill: #24292e; text-anchor: middle; }
+  text.tap-sm { font-family: "SF Mono", "Cascadia Code", Consolas, monospace; font-size: 10px; fill: #24292e; text-anchor: middle; }
+  text.hold { font-family: "SF Mono", "Cascadia Code", Consolas, monospace; font-size: 9px; fill: #6a9ec8; text-anchor: middle; }
+  text.trans-text { font-family: "SF Mono", "Cascadia Code", Consolas, monospace; font-size: 11px; fill: #c0c0c0; text-anchor: middle; }
+  text.layer-label { font-family: -apple-system, "Segoe UI", sans-serif; font-size: 14px; font-weight: 600; fill: #fff; }
+  rect.label-bg { rx: 4; ry: 4; }
+</style>
+
+<!-- ============================================ -->
+<!-- Layer 0: Default (Mac QWERTY)                -->
+<!-- ============================================ -->
+<g>
+  <!-- Label -->
+  <rect x="14" y="14" width="120" height="22" class="label-bg" fill="#4a90d9"/>
+  <text x="24" y="30" class="layer-label">Default (Mac)</text>
+
+  <!-- Row 0 -->
+  <g transform="translate(14,42)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">Q</text></g>
+  <g transform="translate(74,42)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">W</text></g>
+  <g transform="translate(134,42)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">E</text></g>
+  <g transform="translate(194,42)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">R</text></g>
+  <g transform="translate(254,42)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">T</text></g>
+  <g transform="translate(348,42)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">Y</text></g>
+  <g transform="translate(408,42)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">U</text></g>
+  <g transform="translate(468,42)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">I</text></g>
+  <g transform="translate(528,42)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">O</text></g>
+  <g transform="translate(588,42)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">P</text></g>
+
+  <!-- Row 1 -->
+  <g transform="translate(14,90)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">A</text></g>
+  <g transform="translate(74,90)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">S</text></g>
+  <g transform="translate(134,90)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">D</text></g>
+  <g transform="translate(194,90)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">F</text></g>
+  <g transform="translate(254,90)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">G</text></g>
+  <g transform="translate(348,90)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">H</text></g>
+  <g transform="translate(408,90)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">J</text></g>
+  <g transform="translate(468,90)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">K</text></g>
+  <g transform="translate(528,90)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">L</text></g>
+  <g transform="translate(588,90)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">;</text></g>
+
+  <!-- Row 2 -->
+  <g transform="translate(14,138)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">Z</text></g>
+  <g transform="translate(74,138)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">X</text></g>
+  <g transform="translate(134,138)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">C</text></g>
+  <g transform="translate(194,138)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">V</text></g>
+  <g transform="translate(254,138)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">B</text></g>
+  <g transform="translate(348,138)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">N</text></g>
+  <g transform="translate(408,138)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">M</text></g>
+  <g transform="translate(468,138)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">,</text></g>
+  <g transform="translate(528,138)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">.</text></g>
+  <g transform="translate(588,138)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">/</text></g>
+
+  <!-- Row 3 (thumb) -->
+  <g transform="translate(134,194)"><rect width="56" height="44" class="hold-tap"/><text x="28" y="21" class="tap-sm">Bspc</text><text x="28" y="37" class="hold">⌘ Cmd</text></g>
+  <g transform="translate(194,194)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">Ctrl</text></g>
+  <g transform="translate(254,194)"><rect width="56" height="44" class="hold-tap"/><text x="28" y="21" class="tap-sm">無変換</text><text x="28" y="37" class="hold">⇧ Shift</text></g>
+  <g transform="translate(348,194)"><rect width="56" height="44" class="hold-tap"/><text x="28" y="21" class="tap-sm">Esc</text><text x="28" y="37" class="hold">⌥ Alt</text></g>
+  <g transform="translate(408,194)"><rect width="56" height="44" class="hold-tap"/><text x="28" y="21" class="tap-sm">Space</text><text x="28" y="37" class="hold">Layer 2</text></g>
+  <g transform="translate(468,194)"><rect width="56" height="44" class="hold-tap"/><text x="28" y="21" class="tap-sm">Enter</text><text x="28" y="37" class="hold">Layer 3</text></g>
+</g>
+
+<!-- ============================================ -->
+<!-- Layer 1: Win/Linux                           -->
+<!-- ============================================ -->
+<g>
+  <!-- Label -->
+  <rect x="14" y="256" width="120" height="22" class="label-bg" fill="#6a737d"/>
+  <text x="24" y="272" class="layer-label">Win / Linux</text>
+
+  <!-- Row 0 -->
+  <g transform="translate(14,284)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(74,284)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(134,284)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(194,284)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(254,284)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(348,284)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(408,284)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(468,284)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(528,284)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(588,284)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+
+  <!-- Row 1 -->
+  <g transform="translate(14,332)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(74,332)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(134,332)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(194,332)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(254,332)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(348,332)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(408,332)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(468,332)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(528,332)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(588,332)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+
+  <!-- Row 2 -->
+  <g transform="translate(14,380)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(74,380)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(134,380)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(194,380)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(254,380)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(348,380)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(408,380)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(468,380)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(528,380)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(588,380)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+
+  <!-- Row 3 (thumb) - only changed keys shown -->
+  <g transform="translate(134,436)"><rect width="56" height="44" class="hold-tap"/><text x="28" y="21" class="tap-sm">Bspc</text><text x="28" y="37" class="hold">⌥ Alt</text></g>
+  <g transform="translate(194,436)"><rect width="56" height="44" class="hold-tap"/><text x="28" y="21" class="tap-sm">⌘ Gui</text><text x="28" y="37" class="hold">Layer 5</text></g>
+  <g transform="translate(254,436)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(348,436)"><rect width="56" height="44" class="hold-tap"/><text x="28" y="21" class="tap-sm">Esc</text><text x="28" y="37" class="hold">⌘ Cmd</text></g>
+  <g transform="translate(408,436)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(468,436)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+</g>
+
+<!-- ============================================ -->
+<!-- Layer 2: Numbers & Symbols                   -->
+<!-- ============================================ -->
+<g>
+  <!-- Label -->
+  <rect x="14" y="498" width="160" height="22" class="label-bg" fill="#d9534f"/>
+  <text x="24" y="514" class="layer-label">Numbers &amp; Symbols</text>
+
+  <!-- Row 0 -->
+  <g transform="translate(14,526)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">1</text></g>
+  <g transform="translate(74,526)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">2</text></g>
+  <g transform="translate(134,526)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">3</text></g>
+  <g transform="translate(194,526)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">4</text></g>
+  <g transform="translate(254,526)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">5</text></g>
+  <g transform="translate(348,526)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">6</text></g>
+  <g transform="translate(408,526)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">7</text></g>
+  <g transform="translate(468,526)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">8</text></g>
+  <g transform="translate(528,526)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">9</text></g>
+  <g transform="translate(588,526)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">0</text></g>
+
+  <!-- Row 1 -->
+  <g transform="translate(14,574)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">!</text></g>
+  <g transform="translate(74,574)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">@</text></g>
+  <g transform="translate(134,574)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">#</text></g>
+  <g transform="translate(194,574)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">$</text></g>
+  <g transform="translate(254,574)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">%</text></g>
+  <g transform="translate(348,574)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">←</text></g>
+  <g transform="translate(408,574)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">↓</text></g>
+  <g transform="translate(468,574)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">↑</text></g>
+  <g transform="translate(528,574)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">→</text></g>
+  <g transform="translate(588,574)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+
+  <!-- Row 2 -->
+  <g transform="translate(14,622)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">^</text></g>
+  <g transform="translate(74,622)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">&amp;</text></g>
+  <g transform="translate(134,622)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">*</text></g>
+  <g transform="translate(194,622)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">(</text></g>
+  <g transform="translate(254,622)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">)</text></g>
+  <g transform="translate(348,622)"><rect width="56" height="44" class="disabled"/></g>
+  <g transform="translate(408,622)"><rect width="56" height="44" class="disabled"/></g>
+  <g transform="translate(468,622)"><rect width="56" height="44" class="disabled"/></g>
+  <g transform="translate(528,622)"><rect width="56" height="44" class="disabled"/></g>
+  <g transform="translate(588,622)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+
+  <!-- Row 3 (thumb) -->
+  <g transform="translate(134,678)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(194,678)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(254,678)"><rect width="56" height="44" class="hold-tap"/><text x="28" y="21" class="tap-sm">変換</text><text x="28" y="37" class="hold">⇧ Shift</text></g>
+  <g transform="translate(348,678)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(408,678)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(468,678)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+</g>
+
+<!-- ============================================ -->
+<!-- Layer 3: Settings & Media                    -->
+<!-- ============================================ -->
+<g>
+  <!-- Label -->
+  <rect x="14" y="740" width="148" height="22" class="label-bg" fill="#5cb85c"/>
+  <text x="24" y="756" class="layer-label">Settings &amp; Media</text>
+
+  <!-- Row 0 -->
+  <g transform="translate(14,768)"><rect width="56" height="44" class="disabled"/></g>
+  <g transform="translate(74,768)"><rect width="56" height="44" class="disabled"/></g>
+  <g transform="translate(134,768)"><rect width="56" height="44" class="disabled"/></g>
+  <g transform="translate(194,768)"><rect width="56" height="44" class="disabled"/></g>
+  <g transform="translate(254,768)"><rect width="56" height="44" class="disabled"/></g>
+  <g transform="translate(348,768)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">⏮</text></g>
+  <g transform="translate(408,768)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">⏯</text></g>
+  <g transform="translate(468,768)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">⏭</text></g>
+  <g transform="translate(528,768)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap-sm">Vol-</text></g>
+  <g transform="translate(588,768)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap-sm">Vol+</text></g>
+
+  <!-- Row 1 -->
+  <g transform="translate(14,816)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">F1</text></g>
+  <g transform="translate(74,816)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">F2</text></g>
+  <g transform="translate(134,816)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">F3</text></g>
+  <g transform="translate(194,816)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">F4</text></g>
+  <g transform="translate(254,816)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">F5</text></g>
+  <g transform="translate(348,816)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">F6</text></g>
+  <g transform="translate(408,816)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">F7</text></g>
+  <g transform="translate(468,816)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">F8</text></g>
+  <g transform="translate(528,816)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">F9</text></g>
+  <g transform="translate(588,816)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap-sm">F10</text></g>
+
+  <!-- Row 2 -->
+  <g transform="translate(14,864)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap-sm">TO(0)</text></g>
+  <g transform="translate(74,864)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap-sm">TG(1)</text></g>
+  <g transform="translate(134,864)"><rect width="56" height="44" class="disabled"/></g>
+  <g transform="translate(194,864)"><rect width="56" height="44" class="disabled"/></g>
+  <g transform="translate(254,864)"><rect width="56" height="44" class="disabled"/></g>
+  <g transform="translate(348,864)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap-sm">F11</text></g>
+  <g transform="translate(408,864)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap-sm">F12</text></g>
+  <g transform="translate(468,864)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap-sm">F13</text></g>
+  <g transform="translate(528,864)"><rect width="56" height="44" class="disabled"/></g>
+  <g transform="translate(588,864)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+
+  <!-- Row 3 (thumb) -->
+  <g transform="translate(134,920)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(194,920)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(254,920)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(348,920)"><rect width="56" height="44" class="key"/><text x="28" y="27" class="tap">Del</text></g>
+  <g transform="translate(408,920)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+  <g transform="translate(468,920)"><rect width="56" height="44" class="trans"/><text x="28" y="27" class="trans-text">▽</text></g>
+</g>
+
+</svg>
