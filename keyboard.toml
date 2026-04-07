@@ -24,14 +24,14 @@ keymap = [
     # Layer 0: Default (Mac QWERTY)
     [
         ["Q",       "W",       "E",       "R",           "T",                "Y",              "U",            "I",            "O",     "P"],
-        ["A",       "S",       "D",       "F",           "G",                "H",              "J",            "K",            "L",     "MT(Semicolon, LGui | LShift)"],
+        ["A",       "S",       "D",       "F",           "G",                "H",              "J",            "K",            "L",     "Semicolon"],
         ["Z",       "X",       "C",       "V",           "B",                "N",              "M",            "Comma",        "Dot",   "MT(Slash, LGui | LCtrl)"],
         ["No",      "No",      "MT(Backspace, LGui)", "LCtrl", "MT(International5, LShift)", "MT(Escape, LAlt)", "LT(2, Space)", "LT(3, Enter)", "No", "No"],
     ],
     # Layer 1: Win/Linux overlay
     [
         ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
-        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "MT(Semicolon, LCtrl | LShift)"],
+        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
         ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "MT(Slash, LCtrl | LAlt)"],
         ["_",       "_",       "MT(Backspace, LAlt)", "LT(5, LGui)", "_",   "MT(Escape, LGui)", "_",          "_",            "_",     "_"],
     ],
@@ -75,9 +75,9 @@ keymap = [
 # --------------------------------------------------
 # Combos (ported from ZMK)
 # --------------------------------------------------
-# Note: ZMK mod-morph (shift-inverted output) is not available in RMK.
 # Combos output the base keycode; shift produces the natural shifted character.
 # e.g. Minus combo: tap=-, shift=_  (natural USB HID behavior)
+# Inverted behaviors (colon_semi, pipe_bslash) are handled via [behavior.fork].
 [behavior.combo]
 timeout = "50ms"
 combos = [
@@ -102,6 +102,29 @@ combos = [
 
   # Neovim toggle
   { actions = ["S", "D"], output = "TG(6)" },               # Toggle Neovim layer
+]
+
+# --------------------------------------------------
+# Fork: mod-morph (shift-inverted output)
+# --------------------------------------------------
+# ZMKのmod-morphをRMKのforkで再現。
+# forkはShift押下時に出力を切り替え、match_anyの修飾キーを自動抑制する。
+[behavior.fork]
+forks = [
+  # colon_semi: デフォルト=: (Shift+;を送信), Shift=; (Shiftを抑制して;を送信)
+  # Note: MT(hold=Cmd+Shift)はforkと併用不可のため省略。
+  #       Cmd+ShiftはD+Fコンボ等で代替可能。
+  { trigger = "Semicolon",
+    negative_output = "WM(Semicolon, LShift)",
+    positive_output = "Semicolon",
+    match_any = "LShift|RShift" },
+
+  # pipe_bslash: デフォルト=| (Shift+\を送信), Shift=\ (Shiftを抑制して\を送信)
+  # U+Iコンボの出力に適用
+  { trigger = "Backslash",
+    negative_output = "WM(Backslash, LShift)",
+    positive_output = "Backslash",
+    match_any = "LShift|RShift" },
 ]
 
 # --------------------------------------------------
