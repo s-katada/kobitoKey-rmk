@@ -1,0 +1,137 @@
+[keyboard]
+name = "KobitoKey"
+product_name = "KobitoKey"
+vendor_id = 0x4B4B
+product_id = 0x0001
+manufacturer = "KobitoKey"
+serial_number = "vial:f64c2b3c:000001"
+chip = "nrf52840"
+
+# --------------------------------------------------
+# Layout: 4 rows x 10 cols (left 5 + right 5), 7 layers
+# --------------------------------------------------
+[layout]
+rows = 4
+cols = 10
+layers = 7
+keymap = [
+    # Layer 0: Default (Mac QWERTY)
+    [
+        ["Q",       "W",       "E",       "R",           "T",                "Y",              "U",            "I",            "O",     "P"],
+        ["A",       "S",       "D",       "F",           "G",                "H",              "J",            "K",            "L",     "Semicolon"],
+        ["Z",       "X",       "C",       "V",           "B",                "N",              "M",            "Comma",        "Dot",   "Slash"],
+        ["No",      "No",      "MT(Backspace, LGui)", "LCtrl", "MT(International5, LShift)", "MT(Escape, LAlt)", "LT(2, Space)", "LT(3, Enter)", "No", "No"],
+    ],
+    # Layer 1: Win/Linux overlay
+    [
+        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
+        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
+        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
+        ["_",       "_",       "MT(Backspace, LAlt)", "LT(5, LGui)", "_",   "MT(Escape, LGui)", "_",          "_",            "_",     "_"],
+    ],
+    # Layer 2: Numbers & Symbols
+    [
+        ["Kc1",     "Kc2",     "Kc3",     "Kc4",         "Kc5",              "Kc6",            "Kc7",          "Kc8",          "Kc9",   "Kc0"],
+        ["WM(Kc1, LShift)", "WM(Kc2, LShift)", "WM(Kc3, LShift)", "WM(Kc4, LShift)", "WM(Kc5, LShift)", "Left", "Down", "Up", "Right", "_"],
+        ["WM(Kc6, LShift)", "WM(Kc7, LShift)", "WM(Kc8, LShift)", "WM(Kc9, LShift)", "WM(Kc0, LShift)", "No", "No", "No", "No", "_"],
+        ["_",       "_",       "_",       "_",           "MT(International4, LShift)", "_",     "_",            "_",            "_",     "_"],
+    ],
+    # Layer 3: Settings & Media
+    [
+        ["No",      "No",      "No",      "No",          "No",               "MediaPrevTrack", "MediaPlayPause", "MediaNextTrack", "AudioVolDown", "AudioVolUp"],
+        ["F1",      "F2",      "F3",      "F4",          "F5",               "F6",             "F7",           "F8",           "F9",    "F10"],
+        ["TO(0)",   "TG(1)",   "No",      "No",          "No",               "F11",            "F12",          "F13",          "No",    "_"],
+        ["_",       "_",       "_",       "_",           "_",                "Delete",         "_",            "_",            "_",     "_"],
+    ],
+    # Layer 4: Mouse (auto-activated by trackball in ZMK, manual in RMK)
+    [
+        ["No",      "No",      "No",      "No",          "No",               "No",             "No",           "No",           "No",    "_"],
+        ["LShift",  "No",      "No",      "No",          "No",               "No",             "No",           "No",           "No",    "_"],
+        ["LCtrl",   "No",      "No",      "No",          "No",               "No",             "No",           "No",           "No",    "_"],
+        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
+    ],
+    # Layer 5: Emacs
+    [
+        ["No",      "No",      "End",     "No",          "No",               "No",             "No",           "No",           "No",    "Up"],
+        ["Home",    "No",      "Delete",  "Right",       "No",               "Backspace",      "No",           "No",           "No",    "No"],
+        ["No",      "No",      "No",      "No",          "Left",             "Down",           "No",           "No",           "No",    "No"],
+        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
+    ],
+    # Layer 6: Neovim
+    [
+        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
+        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
+        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
+        ["_",       "_",       "_",       "LCtrl",       "_",                "_",              "_",            "_",            "_",     "_"],
+    ],
+]
+
+# --------------------------------------------------
+# Storage (for Vial keymap persistence)
+# --------------------------------------------------
+[storage]
+
+# --------------------------------------------------
+# BLE
+# --------------------------------------------------
+[ble]
+enabled = true
+
+# --------------------------------------------------
+# Split keyboard configuration
+# --------------------------------------------------
+[split]
+connection = "ble"
+
+[split.central]
+rows = 4
+cols = 5
+row_offset = 0
+col_offset = 0
+ble_addr = [0x18, 0xe2, 0x21, 0x80, 0xc0, 0xc7]
+
+[split.central.matrix]
+matrix_type = "normal"
+# col2row is the default diode direction
+row_pins = ["P0_03", "P0_28", "P0_29", "P1_11"]
+col_pins = ["P1_15", "P1_14", "P1_13", "P1_12", "P0_10"]
+
+# Left trackball (on central)
+[[split.central.input_device.pmw3610]]
+name = "trackball_left"
+spi.instance = "bitbang0"
+spi.sck = "P0_05"
+spi.mosi = "P0_04"
+spi.miso = "P0_04"
+spi.cs = "P0_09"
+motion = "P0_02"
+cpi = 700
+invert_x = true
+smart_mode = true
+
+# --------------------------------------------------
+# Peripheral (right half)
+# --------------------------------------------------
+[[split.peripheral]]
+rows = 4
+cols = 5
+row_offset = 0
+col_offset = 5
+ble_addr = [0x7e, 0xfe, 0x73, 0x9e, 0x66, 0xe3]
+
+[split.peripheral.matrix]
+matrix_type = "normal"
+row_pins = ["P0_03", "P0_28", "P0_29", "P1_11"]
+col_pins = ["P1_15", "P1_14", "P1_13", "P1_12", "P0_10"]
+
+# Right trackball (on peripheral)
+[[split.peripheral.input_device.pmw3610]]
+name = "trackball_right"
+spi.instance = "bitbang0"
+spi.sck = "P0_05"
+spi.mosi = "P0_04"
+spi.miso = "P0_04"
+spi.cs = "P0_09"
+motion = "P0_02"
+cpi = 800
+smart_mode = true
