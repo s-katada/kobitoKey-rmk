@@ -8,6 +8,12 @@ serial_number = "vial:f64c2b3c:000001"
 chip = "nrf52840"
 
 # --------------------------------------------------
+# RMK behavior limits
+# --------------------------------------------------
+[rmk]
+combo_max_num = 16
+
+# --------------------------------------------------
 # Layout: 4 rows x 10 cols (left 5 + right 5), 7 layers
 # --------------------------------------------------
 [layout]
@@ -18,15 +24,15 @@ keymap = [
     # Layer 0: Default (Mac QWERTY)
     [
         ["Q",       "W",       "E",       "R",           "T",                "Y",              "U",            "I",            "O",     "P"],
-        ["A",       "S",       "D",       "F",           "G",                "H",              "J",            "K",            "L",     "Semicolon"],
-        ["Z",       "X",       "C",       "V",           "B",                "N",              "M",            "Comma",        "Dot",   "Slash"],
+        ["A",       "S",       "D",       "F",           "G",                "H",              "J",            "K",            "L",     "MT(Semicolon, LGui | LShift)"],
+        ["Z",       "X",       "C",       "V",           "B",                "N",              "M",            "Comma",        "Dot",   "MT(Slash, LGui | LCtrl)"],
         ["No",      "No",      "MT(Backspace, LGui)", "LCtrl", "MT(International5, LShift)", "MT(Escape, LAlt)", "LT(2, Space)", "LT(3, Enter)", "No", "No"],
     ],
     # Layer 1: Win/Linux overlay
     [
         ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
-        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
-        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
+        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "MT(Semicolon, LCtrl | LShift)"],
+        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "MT(Slash, LCtrl | LAlt)"],
         ["_",       "_",       "MT(Backspace, LAlt)", "LT(5, LGui)", "_",   "MT(Escape, LGui)", "_",          "_",            "_",     "_"],
     ],
     # Layer 2: Numbers & Symbols
@@ -64,6 +70,38 @@ keymap = [
         ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
         ["_",       "_",       "_",       "LCtrl",       "_",                "_",              "_",            "_",            "_",     "_"],
     ],
+]
+
+# --------------------------------------------------
+# Combos (ported from ZMK)
+# --------------------------------------------------
+# Note: ZMK mod-morph (shift-inverted output) is not available in RMK.
+# Combos output the base keycode; shift produces the natural shifted character.
+# e.g. Minus combo: tap=-, shift=_  (natural USB HID behavior)
+[behavior.combo]
+timeout = "50ms"
+combos = [
+  # Left hand symbols
+  { actions = ["Q", "W"], output = "Grave" },              # ` (shift: ~)
+  { actions = ["A", "S"], output = "Tab" },                 # Tab
+
+  # Right hand symbols
+  { actions = ["Y", "U"], output = "Backspace" },           # Bspc
+  { actions = ["U", "I"], output = "Backslash" },           # \ (shift: |)
+  { actions = ["I", "O"], output = "Minus" },               # - (shift: _)
+  { actions = ["O", "P"], output = "Equal" },               # = (shift: +)
+  { actions = ["J", "K"], output = "LeftBracket" },         # [ (shift: {)
+  { actions = ["K", "L"], output = "RightBracket" },        # ] (shift: })
+  { actions = ["L", "Semicolon"], output = "Quote" },       # ' (shift: ")
+  { actions = ["N", "M"], output = "Backspace" },           # Bspc
+  { actions = ["Comma", "Dot"], output = "Slash" },         # / (shift: ?)
+
+  # Modifier combos
+  { actions = ["D", "F"], output = "WM(No, LGui | LAlt)", layer = 0 },   # Cmd+Alt (Mac)
+  { actions = ["D", "F"], output = "WM(No, LCtrl | LAlt)", layer = 1 },  # Ctrl+Alt (Win)
+
+  # Neovim toggle
+  { actions = ["S", "D"], output = "TG(6)" },               # Toggle Neovim layer
 ]
 
 # --------------------------------------------------
