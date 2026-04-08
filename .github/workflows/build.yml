@@ -52,12 +52,17 @@ jobs:
       - name: Build peripheral
         run: cargo build --release --bin peripheral
 
+      - name: Build reset firmware
+        run: cd reset && cargo build --release
+
       - name: Generate UF2 files
         run: |
           cargo objcopy --release --bin central -- -O ihex central.hex
           cargo objcopy --release --bin peripheral -- -O ihex peripheral.hex
           cargo hex-to-uf2 --input-path central.hex --output-path kobito-key-${{ matrix.variant.id }}-central.uf2 --family nrf52840
           cargo hex-to-uf2 --input-path peripheral.hex --output-path kobito-key-${{ matrix.variant.id }}-peripheral.uf2 --family nrf52840
+          rust-objcopy -O ihex reset/target/thumbv7em-none-eabihf/release/kobitokey-reset reset.hex
+          cargo hex-to-uf2 --input-path reset.hex --output-path kobito-key-reset.uf2 --family nrf52840
 
       - name: Upload firmware artifacts
         uses: actions/upload-artifact@v4
@@ -66,3 +71,4 @@ jobs:
           path: |
             kobito-key-${{ matrix.variant.id }}-central.uf2
             kobito-key-${{ matrix.variant.id }}-peripheral.uf2
+            kobito-key-reset.uf2

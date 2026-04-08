@@ -1,0 +1,14 @@
+[package]
+name = "kobitokey-reset"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+cortex-m = { version = "0.7.7", features = ["inline-asm"] }
+cortex-m-rt = "0.7.5"
+nrf52840-pac = "0.12"
+
+[profile.release]
+codegen-units = 1
+opt-level = "z"
+lto = "fat"

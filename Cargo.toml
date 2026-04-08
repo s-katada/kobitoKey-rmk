@@ -63,6 +63,7 @@ path = "src/central.rs"
 name = "peripheral"
 path = "src/peripheral.rs"
 
+
 [profile.dev]
 codegen-units = 1
 debug = true
