@@ -169,6 +169,7 @@ motion = "P0_02"
 cpi = 700
 invert_x = true
 smart_mode = true
+force_awake = true
 
 # --------------------------------------------------
 # Peripheral (right half)
@@ -196,3 +197,4 @@ spi.cs = "P0_09"
 motion = "P0_02"
 cpi = 800
 smart_mode = true
+force_awake = true
