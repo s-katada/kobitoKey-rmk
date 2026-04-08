@@ -9,9 +9,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        variant:
+          - { id: shiro, name: "KobitoKey Shiro" }
+          - { id: yoru,  name: "KobitoKey Yoru" }
+          - { id: yo,    name: "KobitoKey Yo" }
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set BLE device name for variant
+        run: |
+          sed -i 's/^name = "KobitoKey"/name = "${{ matrix.variant.name }}"/' keyboard.toml
+          sed -i 's/^product_name = "KobitoKey"/product_name = "${{ matrix.variant.name }}"/' keyboard.toml
 
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y liblzma-dev libclang-dev
@@ -43,15 +54,15 @@ jobs:
 
       - name: Generate UF2 files
         run: |
-          cargo objcopy --release --bin central -- -O ihex rmk-central.hex
-          cargo objcopy --release --bin peripheral -- -O ihex rmk-peripheral.hex
-          cargo hex-to-uf2 --input-path rmk-central.hex --output-path rmk-central.uf2 --family nrf52840
-          cargo hex-to-uf2 --input-path rmk-peripheral.hex --output-path rmk-peripheral.uf2 --family nrf52840
+          cargo objcopy --release --bin central -- -O ihex central.hex
+          cargo objcopy --release --bin peripheral -- -O ihex peripheral.hex
+          cargo hex-to-uf2 --input-path central.hex --output-path kobito-key-${{ matrix.variant.id }}-central.uf2 --family nrf52840
+          cargo hex-to-uf2 --input-path peripheral.hex --output-path kobito-key-${{ matrix.variant.id }}-peripheral.uf2 --family nrf52840
 
       - name: Upload firmware artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: kobitokey-firmware
+          name: kobito-key-${{ matrix.variant.id }}
           path: |
-            rmk-central.uf2
-            rmk-peripheral.uf2
+            kobito-key-${{ matrix.variant.id }}-central.uf2
+            kobito-key-${{ matrix.variant.id }}-peripheral.uf2
