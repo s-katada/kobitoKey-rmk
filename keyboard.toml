@@ -8,13 +8,35 @@ serial_number = "vial:f64c2b3c:000001"
 chip = "nrf52840"
 
 # --------------------------------------------------
-# RMK behavior limits
+# RMK 全体設定
+#   ble_profiles_num=5 で ZMK の BT_SEL 0..4 に対応
+#   combo_max_num=16 (ZMK の combos と同数)
 # --------------------------------------------------
 [rmk]
 combo_max_num = 16
+ble_profiles_num = 5
 
 # --------------------------------------------------
-# Layout: 4 rows x 10 cols (left 5 + right 5), 7 layers
+# Layout: 4 rows x 10 cols, 7 layers
+# --------------------------------------------------
+# ZMK Behavior 対応一覧
+#   ht_cmd_shift_colon  → TD(0)/TD(1)  (fork で Shift 状態に応じて切替)
+#   ht_ctrl_shift_colon → TD(2)/TD(3)
+#   mt LSHFT LG(LBKT)   → TD(4)        (hold=Shift, tap=Cmd+[)
+#   td_home_ctla        → TD(5)        (tap=Home, double=Ctrl+A)
+#   td_kill_line        → TD(6)        (tap=Ctrl+K, double=Macro0=kill_line)
+#   ht_cmd_ctrl_qmark   → MT(Slash, LGui|LCtrl)   (`/`/`?` は自然反転で OK)
+#   ht_ctrl_alt_qmark   → MT(Slash, LCtrl|LAlt)
+#   bt BT_SEL N         → User(N)
+#   bt BT_CLR           → User(7) (ClearProfile)
+#
+# `;` キーの mod-morph 完全再現 (ZMK colon_semi):
+#   - 通常時:   morse[0].tap = WM(Semicolon, LShift)  →  `:`
+#   - 通常時:   morse[0].hold = WM(No, LGui|LShift)   →  Cmd+Shift
+#   - Shift時:  fork → morse[1] へ差し替え + Shift 抑制
+#                morse[1].tap = Semicolon (Shift 抑制中)  →  `;`
+#                morse[1].hold = WM(No, LGui|LShift)      →  Cmd+Shift
+#   Win 用 Layer 1 (1,9) は morse[2]/[3] で同様に Ctrl+Shift hold。
 # --------------------------------------------------
 [layout]
 rows = 4
@@ -23,123 +45,199 @@ layers = 7
 keymap = [
     # Layer 0: Default (Mac QWERTY)
     [
-        ["Q",       "W",       "E",       "R",           "T",                "Y",              "U",            "I",            "O",     "P"],
-        ["A",       "S",       "D",       "F",           "G",                "H",              "J",            "K",            "L",     "Semicolon"],
-        ["Z",       "X",       "C",       "V",           "B",                "N",              "M",            "Comma",        "Dot",   "MT(Slash, LGui | LCtrl)"],
-        ["No",      "No",      "MT(Backspace, LGui)", "LCtrl", "MT(International5, LShift)", "MT(Escape, LAlt)", "LT(2, Space)", "LT(3, Enter)", "No", "No"],
+        ["Q",  "W",  "E",  "R",  "T",         "Y",  "U",  "I",  "O",  "P"],
+        ["A",  "S",  "D",  "F",  "G",         "H",  "J",  "K",  "L",  "TD(0)"],
+        ["Z",  "X",  "C",  "V",  "B",         "N",  "M",  "Comma", "Dot", "MT(Slash, LGui | LCtrl)"],
+        ["No", "No", "MT(Backspace, LGui)", "LCtrl", "MT(Language2, LShift)",
+                                             "MT(Escape, LAlt)", "LT(2, Space)", "LT(3, Enter)", "No", "No"],
     ],
-    # Layer 1: Win/Linux overlay
+    # Layer 1: Win/Linux overlay (差分のみ)
     [
-        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
-        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
-        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "MT(Slash, LCtrl | LAlt)"],
-        ["_",       "_",       "MT(Backspace, LAlt)", "LT(5, LGui)", "_",   "MT(Escape, LGui)", "_",          "_",            "_",     "_"],
+        ["_",  "_",  "_",  "_",  "_",         "_",  "_",  "_",  "_",  "_"],
+        ["_",  "_",  "_",  "_",  "_",         "_",  "_",  "_",  "_",  "TD(2)"],
+        ["_",  "_",  "_",  "_",  "_",         "_",  "_",  "_",  "_",  "MT(Slash, LCtrl | LAlt)"],
+        ["_",  "_",  "MT(Backspace, LAlt)", "LT(5, LGui)", "_",
+                                             "MT(Escape, LGui)", "_", "_", "_", "_"],
     ],
     # Layer 2: Numbers & Symbols
     [
-        ["Kc1",     "Kc2",     "Kc3",     "Kc4",         "Kc5",              "Kc6",            "Kc7",          "Kc8",          "Kc9",   "Kc0"],
-        ["WM(Kc1, LShift)", "WM(Kc2, LShift)", "WM(Kc3, LShift)", "WM(Kc4, LShift)", "WM(Kc5, LShift)", "Left", "Down", "Up", "Right", "_"],
-        ["WM(Kc6, LShift)", "WM(Kc7, LShift)", "WM(Kc8, LShift)", "WM(Kc9, LShift)", "WM(Kc0, LShift)", "No", "No", "No", "No", "_"],
-        ["_",       "_",       "_",       "_",           "MT(International4, LShift)", "_",     "_",            "_",            "_",     "_"],
+        ["Kc1", "Kc2", "Kc3", "Kc4", "Kc5",   "Kc6", "Kc7", "Kc8", "Kc9", "Kc0"],
+        ["WM(Kc1, LShift)", "WM(Kc2, LShift)", "WM(Kc3, LShift)", "WM(Kc4, LShift)", "WM(Kc5, LShift)",
+                                             "Left", "Down", "Up",  "Right", "_"],
+        ["WM(Kc6, LShift)", "WM(Kc7, LShift)", "WM(Kc8, LShift)", "WM(Kc9, LShift)", "WM(Kc0, LShift)",
+                                             "No",   "No",   "No",  "No",    "_"],
+        ["_",  "_",  "_",  "_",  "MT(Language1, LShift)",
+                                             "_",  "_",  "_",  "_",  "_"],
     ],
     # Layer 3: Settings & Media
     [
-        ["No",      "No",      "No",      "No",          "No",               "MediaPrevTrack", "MediaPlayPause", "MediaNextTrack", "AudioVolDown", "AudioVolUp"],
-        ["F1",      "F2",      "F3",      "F4",          "F5",               "F6",             "F7",           "F8",           "F9",    "F10"],
-        ["TO(0)",   "TG(1)",   "No",      "No",          "No",               "F11",            "F12",          "F13",          "No",    "_"],
-        ["_",       "_",       "_",       "_",           "_",                "Delete",         "_",            "_",            "_",     "_"],
+        ["User(0)", "User(1)", "User(2)", "User(3)", "User(4)",
+                                             "MediaPrevTrack", "MediaPlayPause", "MediaNextTrack", "AudioVolDown", "AudioVolUp"],
+        ["F1", "F2", "F3", "F4", "F5",       "F6", "F7", "F8", "F9", "F10"],
+        ["TO(0)", "TG(1)", "No", "No", "User(7)",
+                                             "F11", "F12", "F13", "No", "_"],
+        ["_",  "_",  "_",  "_",  "_",        "Delete", "_", "_", "_", "_"],
     ],
-    # Layer 4: Mouse (auto-activated by trackball in ZMK, manual in RMK)
+    # Layer 4: Mac shortcut / mouse buttons
     [
-        ["No",      "No",      "No",      "No",          "No",               "No",             "No",           "No",           "No",    "_"],
-        ["LShift",  "No",      "No",      "No",          "No",               "No",             "No",           "No",           "No",    "_"],
-        ["LCtrl",   "No",      "No",      "No",          "No",               "No",             "No",           "No",           "No",    "_"],
-        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
+        ["WM(LeftBracket, LGui | LShift)", "WM(RightBracket, LGui | LShift)", "No", "No", "No",
+                                             "MouseBtn1", "MouseBtn2", "MouseBtn2", "MouseBtn3", "_"],
+        ["TD(4)", "WM(RightBracket, LGui)", "No", "No", "No",
+                                             "No", "No", "No", "No", "_"],
+        ["LCtrl", "No", "WM(C, LGui)", "WM(V, LGui)", "No",
+                                             "No", "No", "No", "No", "_"],
+        ["_",  "_",  "_",  "_",  "_",        "_",  "_",  "_",  "_",  "_"],
     ],
-    # Layer 5: Emacs
+    # Layer 5: Emacs (Win 用 Ctrl コンビ)
     [
-        ["No",      "No",      "End",     "No",          "No",               "No",             "No",           "No",           "No",    "Up"],
-        ["Home",    "No",      "Delete",  "Right",       "No",               "Backspace",      "No",           "No",           "No",    "No"],
-        ["No",      "No",      "No",      "No",          "Left",             "Down",           "No",           "No",           "No",    "No"],
-        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
+        ["WM(Q, LCtrl)", "WM(W, LCtrl)", "End", "WM(R, LCtrl)", "WM(T, LCtrl)",
+                                             "WM(Y, LCtrl)", "WM(U, LCtrl)", "WM(I, LCtrl)", "WM(O, LCtrl)", "Up"],
+        ["TD(5)", "WM(S, LCtrl)", "Delete", "Right", "WM(G, LCtrl)",
+                                             "Backspace", "WM(J, LCtrl)", "TD(6)", "WM(L, LCtrl)", "WM(Semicolon, LCtrl)"],
+        ["WM(Z, LCtrl)", "WM(X, LCtrl)", "WM(C, LCtrl)", "WM(V, LCtrl)", "Left",
+                                             "Down", "WM(M, LCtrl)", "WM(Comma, LCtrl)", "WM(Dot, LCtrl)", "WM(Quote, LCtrl)"],
+        ["_",  "_",  "_",  "_",  "_",        "_",  "_",  "_",  "_",  "_"],
     ],
-    # Layer 6: Neovim
+    # Layer 6: Neovim (Ctrl を抑制 → Emacs を無効化)
     [
-        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
-        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
-        ["_",       "_",       "_",       "_",           "_",                "_",              "_",            "_",            "_",     "_"],
-        ["_",       "_",       "_",       "LCtrl",       "_",                "_",              "_",            "_",            "_",     "_"],
+        ["_",  "_",  "_",  "_",  "_",        "_",  "_",  "_",  "_",  "_"],
+        ["_",  "_",  "_",  "_",  "_",        "_",  "_",  "_",  "_",  "_"],
+        ["_",  "_",  "_",  "_",  "_",        "_",  "_",  "_",  "_",  "_"],
+        ["_",  "_",  "_",  "LCtrl", "_",     "_",  "_",  "_",  "_",  "_"],
     ],
 ]
 
 # --------------------------------------------------
-# Combos (ported from ZMK)
+# Combos (ZMK 移植)
 # --------------------------------------------------
-# Combos output the base keycode; shift produces the natural shifted character.
-# e.g. Minus combo: tap=-, shift=_  (natural USB HID behavior)
-# Inverted behaviors (colon_semi, pipe_bslash) are handled via [behavior.fork].
 [behavior.combo]
 timeout = "50ms"
 combos = [
-  # Left hand symbols
-  { actions = ["Q", "W"], output = "Grave" },              # ` (shift: ~)
-  { actions = ["A", "S"], output = "Tab" },                 # Tab
+  # 左手
+  { actions = ["Q", "W"],         output = "Grave" },            # ` / ~
+  { actions = ["A", "S"],         output = "Tab" },
 
-  # Right hand symbols
-  { actions = ["Y", "U"], output = "Backspace" },           # Bspc
-  { actions = ["U", "I"], output = "Backslash" },           # \ (shift: |)
-  { actions = ["I", "O"], output = "Minus" },               # - (shift: _)
-  { actions = ["O", "P"], output = "Equal" },               # = (shift: +)
-  { actions = ["J", "K"], output = "LeftBracket" },         # [ (shift: {)
-  { actions = ["K", "L"], output = "RightBracket" },        # ] (shift: })
-  { actions = ["L", "Semicolon"], output = "Quote" },       # ' (shift: ")
-  { actions = ["N", "M"], output = "Backspace" },           # Bspc
-  { actions = ["Comma", "Dot"], output = "Slash" },         # / (shift: ?)
+  # 右手
+  { actions = ["Y", "U"],         output = "Backspace" },
+  { actions = ["U", "I"],         output = "Backslash" },        # \ / | (fork 反転)
+  { actions = ["I", "O"],         output = "Minus" },            # - / _
+  { actions = ["O", "P"],         output = "Equal" },            # = / +
+  { actions = ["J", "K"],         output = "LeftBracket" },      # [ / {
+  { actions = ["K", "L"],         output = "RightBracket" },     # ] / }
+  { actions = ["L", "Semicolon"], output = "Quote" },            # ' / "
+  { actions = ["N", "M"],         output = "Backspace" },
+  { actions = ["Comma", "Dot"],   output = "Slash" },            # / / ?
 
-  # Modifier combos
-  { actions = ["D", "F"], output = "WM(No, LGui | LAlt)", layer = 0 },   # Cmd+Alt (Mac)
-  { actions = ["D", "F"], output = "WM(No, LCtrl | LAlt)", layer = 1 },  # Ctrl+Alt (Win)
+  # モディファイア
+  { actions = ["D", "F"],         output = "WM(No, LGui | LAlt)",  layer = 0 },  # Mac: Cmd+Alt
+  { actions = ["D", "F"],         output = "WM(No, LCtrl | LAlt)", layer = 1 },  # Win: Ctrl+Alt
 
-  # Neovim toggle
-  { actions = ["S", "D"], output = "TG(6)" },               # Toggle Neovim layer
+  # Neovim トグル
+  { actions = ["S", "D"],         output = "TG(6)", layer = 1 },
+  { actions = ["S", "D"],         output = "TG(6)", layer = 6 },
 ]
 
 # --------------------------------------------------
-# Fork: mod-morph (shift-inverted output)
+# Fork
+#   1) U+I コンボの Backslash 反転 (`|` ↔ `\`)
+#   2-3) TD(0)/TD(2) の `;` mod-morph 反転 (Shift 押下時 TD(1)/TD(3) へ差替)
 # --------------------------------------------------
-# ZMKのmod-morphをRMKのforkで再現。
-# forkはShift押下時に出力を切り替え、match_anyの修飾キーを自動抑制する。
 [behavior.fork]
 forks = [
-  # colon_semi: デフォルト=: (Shift+;を送信), Shift=; (Shiftを抑制して;を送信)
-  # Note: MT(hold=Cmd+Shift)はforkと併用不可のため省略。
-  #       Cmd+ShiftはD+Fコンボ等で代替可能。
-  { trigger = "Semicolon",
-    negative_output = "WM(Semicolon, LShift)",
-    positive_output = "Semicolon",
-    match_any = "LShift|RShift" },
-
-  # pipe_bslash: デフォルト=| (Shift+\を送信), Shift=\ (Shiftを抑制して\を送信)
-  # U+Iコンボの出力に適用
+  # U+I コンボの Backslash:
+  #   通常 `|` (Shift+\) / Shift 押下時 `\` (Shift 抑制)
   { trigger = "Backslash",
     negative_output = "WM(Backslash, LShift)",
     positive_output = "Backslash",
     match_any = "LShift|RShift" },
+
+  # Layer 0 (1,9) ht_cmd_shift_colon: Shift で TD(1) へ差替 (Shift 抑制)
+  { trigger = "TD(0)",
+    negative_output = "TD(0)",
+    positive_output = "TD(1)",
+    match_any = "LShift|RShift" },
+
+  # Layer 1 (1,9) ht_ctrl_shift_colon: Shift で TD(3) へ差替 (Shift 抑制)
+  { trigger = "TD(2)",
+    negative_output = "TD(2)",
+    positive_output = "TD(3)",
+    match_any = "LShift|RShift" },
 ]
 
 # --------------------------------------------------
-# Storage (for Vial keymap persistence)
+# Morse (ホールドタップ / タップダンス)
+#
+#   morse[0]: Layer 0 `;` 通常時  → tap=`:`  / hold=Cmd+Shift
+#   morse[1]: Layer 0 `;` Shift時 → tap=`;` (Shift抑制) / hold=Cmd+Shift
+#   morse[2]: Layer 1 `;` 通常時  → tap=`:`  / hold=Ctrl+Shift
+#   morse[3]: Layer 1 `;` Shift時 → tap=`;` (Shift抑制) / hold=Ctrl+Shift
+#   morse[4]: Layer 4 (1,0) MT     → tap=Cmd+[ / hold=Shift
+#   morse[5]: Layer 5 td_home_ctla → tap=Home / double=Ctrl+A
+#   morse[6]: Layer 5 td_kill_line → tap=Ctrl+K / double=Macro0
+# --------------------------------------------------
+[behavior.morse]
+hold_timeout = "200ms"
+gap_timeout = "200ms"
+
+# morse[0]: ht_cmd_shift_colon (default = `:`)
+[[behavior.morse.morses]]
+tap = "WM(Semicolon, LShift)"
+hold = "WM(No, LGui | LShift)"
+
+# morse[1]: ht_cmd_shift_colon (shifted = `;`, shift は fork が抑制済み)
+[[behavior.morse.morses]]
+tap = "Semicolon"
+hold = "WM(No, LGui | LShift)"
+
+# morse[2]: ht_ctrl_shift_colon (default = `:`)
+[[behavior.morse.morses]]
+tap = "WM(Semicolon, LShift)"
+hold = "WM(No, LCtrl | LShift)"
+
+# morse[3]: ht_ctrl_shift_colon (shifted = `;`)
+[[behavior.morse.morses]]
+tap = "Semicolon"
+hold = "WM(No, LCtrl | LShift)"
+
+# morse[4]: mt LSHFT LG(LBKT)
+[[behavior.morse.morses]]
+tap = "WM(LeftBracket, LGui)"
+hold = "LShift"
+
+# morse[5]: td_home_ctla
+[[behavior.morse.morses]]
+tap = "Home"
+double_tap = "WM(A, LCtrl)"
+
+# morse[6]: td_kill_line
+[[behavior.morse.morses]]
+tap = "WM(K, LCtrl)"
+double_tap = "Macro0"
+
+# --------------------------------------------------
+# Macros
+#   macro0: macro_kill_line = Shift+End → Delete
+# --------------------------------------------------
+[behavior.macros]
+
+[[behavior.macros.macros]]
+operations = [
+  { operation = "down", keycode = "LShift" },
+  { operation = "tap",  keycode = "End" },
+  { operation = "up",   keycode = "LShift" },
+  { operation = "tap",  keycode = "Delete" },
+]
+
+# --------------------------------------------------
+# Storage / BLE
 # --------------------------------------------------
 [storage]
 
-# --------------------------------------------------
-# BLE
-# --------------------------------------------------
 [ble]
 enabled = true
 
 # --------------------------------------------------
-# Split keyboard configuration
+# Split keyboard
 # --------------------------------------------------
 [split]
 connection = "ble"
@@ -153,11 +251,15 @@ ble_addr = [0x18, 0xe2, 0x21, 0x80, 0xc0, 0xc7]
 
 [split.central.matrix]
 matrix_type = "normal"
-# col2row is the default diode direction
+# diode-direction = col2row (RMK default)
+# row-gpios: D1, D2, D3, D6  →  XIAO BLE 物理ピン
+#   D1 = P0_03, D2 = P0_28, D3 = P0_29, D6 = P1_11
+# col-gpios: D10, D9, D8, D7, gpio0 P0_10
+#   D10 = P1_15, D9 = P1_14, D8 = P1_13, D7 = P1_12, gpio0[10] = P0_10
 row_pins = ["P0_03", "P0_28", "P0_29", "P1_11"]
 col_pins = ["P1_15", "P1_14", "P1_13", "P1_12", "P0_10"]
 
-# Left trackball (on central)
+# 左トラックボール (central 側)
 [[split.central.input_device.pmw3610]]
 name = "trackball_left"
 spi.instance = "bitbang0"
@@ -186,7 +288,7 @@ matrix_type = "normal"
 row_pins = ["P0_03", "P0_28", "P0_29", "P1_11"]
 col_pins = ["P1_15", "P1_14", "P1_13", "P1_12", "P0_10"]
 
-# Right trackball (on peripheral)
+# 右トラックボール (peripheral 側)
 [[split.peripheral.input_device.pmw3610]]
 name = "trackball_right"
 spi.instance = "bitbang0"

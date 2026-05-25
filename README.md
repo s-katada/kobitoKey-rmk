@@ -1,119 +1,207 @@
 # KobitoKey RMK
 
-KobitoKey 用の [RMK](https://github.com/HaoboGu/rmk) (Rust Mechanical Keyboard) ファームウェア。40キー無線分割キーボード + デュアルトラックボール。
+KobitoKey 用の [RMK](https://github.com/HaoboGu/rmk) (Rust Mechanical Keyboard) ファームウェア。
+40 キー BLE 分割キーボード + デュアル PMW3610 トラックボール。
+
+ZMK 版 [KobitoKey_QWERTY](../KobitoKey_QWERTY) からの移植。
+
+このリポジトリには 2 つのコンポーネントが含まれます:
+
+- **firmware** (ルート + `reset/`) — central / peripheral / reset firmware (Rust + RMK 0.8)
+- **web** ([`web/`](./web/)) — WebHID 経由の Web キーマップエディタ (React + Vite + TS)
 
 ## スペック
 
-- **MCU**: Seeeduino XIAO BLE (nRF52840)
-- **レイアウト**: BLE無線分割 (左=central, 右=peripheral)
-- **キー数**: 片側20 (メイン17 + 親指3)、合計40
-- **マトリクス**: 4行 x 5列/片側、col2row
-- **トラックボール**: PMW3610 x 2 (SPI半二重)
-- **機能**: Vial対応、7レイヤー、コンボ、Fork (mod-morph)
+| 項目 | 内容 |
+|------|------|
+| MCU | Seeeduino XIAO BLE (nRF52840) |
+| 接続 | BLE 分割 (central = 左、peripheral = 右) + USB |
+| キー数 | 40 (4 行 x 5 列 x 2) |
+| ダイオード | col2row (RMK デフォルト) |
+| ポインタ | PMW3610 x 2 (bit-bang SPI 半二重) |
+| 永続化 | Vial keymap + BLE bond (`[storage]`) |
+
+## ビルド環境
+
+`flake.nix` + `direnv` で全ツールを管理しています。
+
+```sh
+# nix + direnv が入っていれば、ディレクトリに入るだけで自動的に環境が整う
+direnv allow
+
+# または手動で nix シェルに入る
+nix develop
+```
+
+含まれるもの:
+- Rust stable + `thumbv7em-none-eabihf` ターゲット
+- `cargo-make`, `cargo-binutils` (objcopy), `flip-link`, `probe-rs`
+- ※ `cargo-hex-to-uf2` は `cargo install` で取得 (`cargo make uf2` 実行時に自動)
+
+## ビルド & UF2 生成
+
+```sh
+# 主ファームウェア (central + peripheral)
+cargo make uf2
+
+# リセットファームウェア (RMK storage 領域消去用)
+cargo make uf2-reset
+
+# 全部
+cargo make uf2-all
+```
+
+生成物:
+- `rmk-central.uf2` — 左半身 (central)
+- `rmk-peripheral.uf2` — 右半身 (peripheral)
+- `rmk-reset.uf2` — リセット用 (左右どちらでも可)
+
+## フラッシュ手順
+
+1. XIAO BLE のリセットボタンを **素早く 2 回** タップしてブートローダ起動
+2. `XIAO-SENSE` ドライブが現れる
+3. 該当する `.uf2` をドラッグ & ドロップ
+   - 左半身 → `rmk-central.uf2`
+   - 右半身 → `rmk-peripheral.uf2`
+4. 自動再起動
+
+### ペアリングをやり直したい場合
+
+```sh
+cargo make uf2-reset
+```
+で生成された `rmk-reset.uf2` を XIAO BLE にフラッシュすると、
+storage 領域 (0x60000-0x70000, 64KB) が消去され、自動再起動。
+その後通常のファームウェアを書き込み直してください。
 
 ## キーマップ
 
 ![KobitoKey Keymap](images/keymap.svg)
 
-**凡例**:
-- 青キー = ホールドタップ (上段: タップ、下段: ホールド)
-- 破線枠 = 透過 (下レイヤーを継承)
-- 薄灰色 = 無効
+### レイヤー構成
 
-### レイヤー一覧
-
-| # | 名前 | 有効化方法 |
-|---|------|-----------|
-| 0 | デフォルト (Mac) | ベースレイヤー |
-| 1 | Win/Linux | TG(1) トグル |
-| 2 | 数字 & 記号 | Space 長押し |
-| 3 | 設定 & メディア | Enter 長押し |
-| 4 | マウス | 手動切替 |
-| 5 | Emacs | LGui 長押し (レイヤー1時) |
-| 6 | Neovim | S+D コンボ トグル (Ctrl長押し時のみCtrlに変更) |
+| # | 名前 | 有効化 |
+|---|------|--------|
+| 0 | Mac QWERTY | ベース |
+| 1 | Win/Linux overlay | `TG(1)` (Layer 3 から) |
+| 2 | Numbers & Symbols | Space ホールド |
+| 3 | Settings & Media | Enter ホールド |
+| 4 | Mac shortcut / Mouse | (要手動切替) |
+| 5 | Emacs (Win 用 Ctrl コンビ) | LGui ホールド (Layer 1 時) |
+| 6 | Neovim (Ctrl 抑制) | S+D コンボトグル |
 
 ### コンボ
 
-2キー同時押しで記号やアクションを入力。
-
-| キー | 出力 | Shift時 | 備考 |
-|------|------|---------|------|
-| Q + W | `` ` `` | `~` | |
-| A + S | Tab | | |
-| Y + U | Backspace | | |
-| U + I | `\|` | `\` | Fork で反転 |
-| I + O | `-` | `_` | |
-| O + P | `=` | `+` | |
-| J + K | `[` | `{` | |
-| K + L | `]` | `}` | |
-| L + ; | `'` | `"` | |
-| N + M | Backspace | | |
-| , + . | `/` | `?` | |
-| D + F | Cmd+Alt | | Mac (L0) |
-| D + F | Ctrl+Alt | | Win (L1) |
-| S + D | TG(6) | | Neovim トグル |
+| キー | 出力 | Shift |
+|------|------|-------|
+| Q+W | `` ` `` | `~` |
+| A+S | Tab | |
+| Y+U | Backspace | |
+| U+I | `\|` | `\` (fork) |
+| I+O | `-` | `_` |
+| O+P | `=` | `+` |
+| J+K | `[` | `{` |
+| K+L | `]` | `}` |
+| L+; | `'` | `"` |
+| N+M | Backspace | |
+| `,`+`.` | `/` | `?` |
+| D+F | Cmd+Alt (Mac) / Ctrl+Alt (Win) | |
+| S+D | Layer 6 トグル | |
 
 ### Fork (mod-morph)
 
-Shift 押下時に出力を反転。Shift は自動的に抑制される。
+Shift 押下で出力反転 + Shift 自動抑制。
 
-| キー | 通常 | Shift時 |
-|------|------|---------|
-| `;` キー | `:` | `;` |
-| `\` (U+I コンボ) | `\|` | `\` |
+| キー | 通常 | Shift |
+|------|------|-------|
+| `;` | `:` | `;` |
+| `\` (= U+I コンボ) | `\|` | `\` |
 
-### ホールドタップ (親指キー)
+`;` キーは fork で morse 同士を差し替えることで hold-tap と mod-morph を両立 (詳細は下記)。
 
-| キー位置 | タップ | ホールド | レイヤー |
-|----------|--------|---------|---------|
-| 左親指1 | Backspace | Cmd (Mac) / Alt (Win) | 0 / 1 |
-| 左親指2 | Ctrl | - | 0 |
-| 左親指2 | Gui | Layer 5 | 1 |
-| 左親指3 | 無変換 | Shift | 0 |
-| 右親指1 | Escape | Alt (Mac) / Gui (Win) | 0 / 1 |
-| 右親指2 | Space | Layer 2 | 0 |
-| 右親指3 | Enter | Layer 3 | 0 |
+### ホールドタップ
 
-右小指のキーにもホールドタップあり:
+| 位置 | Tap | Hold | レイヤー |
+|------|-----|------|----------|
+| 左親指 1 | Backspace | Cmd (Mac) / Alt (Win) | 0 / 1 |
+| 左親指 2 | LCtrl | (Layer 5 LT) | 1 |
+| 左親指 3 | Lang2 (かな) | LShift | 0 |
+| 左親指 3 | Lang1 (英数) | LShift | 2 |
+| 右親指 1 | Escape | LAlt (Mac) / LGui (Win) | 0 / 1 |
+| 右親指 2 | Space | Layer 2 | 0 |
+| 右親指 3 | Enter | Layer 3 | 0 |
+| 右小指 `;` | `:` (Shift で `;` 反転) | Cmd+Shift (Mac) / Ctrl+Shift (Win) | 0 / 1 |
+| 右小指 `/` | `/` (Shift で `?`) | Cmd+Ctrl (Mac) / Ctrl+Alt (Win) | 0 / 1 |
+| L4 左人差し指 `[` | Cmd+`[` | LShift | 4 |
+| L5 左小指 Home | Home (double-tap で Ctrl+A) | — | 5 |
+| L5 右人差し指 K | Ctrl+K (double-tap で kill-line マクロ) | — | 5 |
 
-| キー位置 | タップ | ホールド | レイヤー |
-|----------|--------|---------|---------|
-| `/` キー | `/` | Cmd+Ctrl (Mac) / Ctrl+Alt (Win) | 0 / 1 |
-
-## ビルド
-
-```sh
-# 開発環境に入る
-nix develop
-# または direnv: プロジェクトディレクトリに移動するだけ
-
-# ビルド
-cargo build --release --bin central
-cargo build --release --bin peripheral
-
-# UF2 ファイル生成
-cargo make uf2
-```
-
-## フラッシュ
-
-1. XIAO BLE のリセットボタンを素早く2回タップしてブートローダーモードに入る
-2. USB ドライブが表示される
-3. `rmk-central.uf2` を左半分にドラッグ & ドロップ
-4. `rmk-peripheral.uf2` を右半分にも同様に行う
-
-## ZMK からの移植状況
+## ZMK→RMK 移植時の差分
 
 | 機能 | 状態 | 備考 |
 |------|------|------|
-| キーマトリクス | 移植済 | 4x10 (5x4 x 2) |
-| BLE 分割 | 移植済 | |
-| PMW3610 トラックボール | 移植済 | 左右両側 |
-| 7レイヤーキーマップ | 移植済 | |
-| コンボ (14個) | 移植済 | |
-| mod-morph (Fork) | 一部移植 | colon_semi, pipe_bslash のみ (反転動作が必要な2つ) |
-| ホールドタップ (MT/LT) | 移植済 | `;`キーのみ Fork と MT 併用不可のため MT 省略 |
-| Vial | 対応済 | |
-| オートマウスレイヤー | 未移植 | RMK 未対応 |
-| トラックボール回転角度 | 未移植 | RMK は invert/swap のみ対応 |
-| tap-dance | 未移植 | RMK の morse で対応可能 |
+| 4 行 x 10 列 BLE split | ✅ | |
+| PMW3610 x 2 (bit-bang) | ✅ | |
+| 7 レイヤー | ✅ | |
+| コンボ (14 個) | ✅ | ZMK と同じ position・出力 |
+| mod-morph 反転 (`\|` ↔ `\`) | ✅ | U+I コンボに fork を適用 |
+| mod-morph 反転 (`:` ↔ `;`) | ✅ | TD(0)→TD(1) (Mac) / TD(2)→TD(3) (Win) を fork で切替 |
+| ホールドタップ (`;` キー, Cmd/Ctrl+Shift) | ✅ | morse (TD) で実現 |
+| ホールドタップ (`/` キー, Cmd+Ctrl) | ✅ | `MT(Slash, ...)` (`/`/`?` は shift で自然反転) |
+| ホールドタップ (親指キー全般) | ✅ | `MT(...)` |
+| Layer 4 mt LSHFT LG(LBKT) | ✅ | `TD(4)` morse |
+| tap-dance (td_home_ctla) | ✅ | `TD(5)` morse (tap=Home, double=Ctrl+A) |
+| tap-dance (td_kill_line) | ✅ | `TD(6)` morse + macro0 |
+| マクロ (kill_line) | ✅ | `macro0` = Shift+End → Delete |
+| 全角/半角キー (LANG1/2) | ✅ | `Language1`/`Language2` (HID 0x90/0x91) |
+| BLE プロファイル切替 (BT_SEL 0..4) | ✅ | `User(0)`〜`User(4)` (ble_profiles_num=5) |
+| BLE bond クリア (BT_CLR) | ✅ | `User(7)` (ClearProfile) |
+| Vial | ✅ | |
+| auto-mouse layer | ❌ | RMK 未対応 (Layer 4 は手動切替) |
+| センサー回転角度 (任意角度) | ❌ | RMK は invert/swap のみ |
+| RGB LED widget | ❌ | RMK 未対応 |
+
+### `;` キーの完全再現方法
+
+ZMK の `ht_cmd_shift_colon` は「hold=Cmd+Shift」+「tap=mod-morph(`:`/`;` 反転)」の組合せ。
+RMK の fork は morse の tap 出力に直接は適用できないので、**fork で morse 自体を差し替える**ことで等価動作を実現:
+
+```
+Position L0 (1,9) = TD(0)
+Position L1 (1,9) = TD(2)
+
+morse[0]: tap = WM(Semicolon, LShift) = `:`     hold = Cmd+Shift   (Shift なし時)
+morse[1]: tap = Semicolon                hold = Cmd+Shift   (Shift 抑制で `;` を出す)
+morse[2]: tap = WM(Semicolon, LShift) = `:`     hold = Ctrl+Shift  (Win)
+morse[3]: tap = Semicolon                hold = Ctrl+Shift  (Win Shift)
+
+fork: TD(0) --(LShift|RShift)--> TD(1)    Shift 抑制
+fork: TD(2) --(LShift|RShift)--> TD(3)    Shift 抑制
+```
+
+## バリアントビルド (CI)
+
+`.github/workflows/build.yml` で `shiro` / `yoru` / `yo` の 3 バリアントを
+それぞれ別の BLE デバイス名でビルドします。
+
+`workflow_dispatch` でも手動実行可能。
+
+## Web エディタ
+
+`web/` 配下に React + Vite ベースの Web キーマップエディタが入っています。
+
+```sh
+cd web
+direnv allow      # または: nix develop "path:..#web"
+pnpm install
+pnpm dev
+```
+
+Chrome / Edge / Brave などの Chromium 系ブラウザで `http://localhost:5173` を開き、
+USB-C で接続したセントラル (左半身) を選択するとキーマップ・コンボ・マクロ・
+Morse・トラックボール CPI が編集できます。詳細は [`web/README.md`](./web/README.md)。
+
+## ライセンス
+
+- firmware: MIT
+- web: GPLv2 (ベースの `kobu/web` のライセンスを継承)

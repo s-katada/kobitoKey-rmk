@@ -1,0 +1,9 @@
+# pnpm の "ignored builds" 警告を抑制する。
+# vite/wrangler 系の依存はビルドスクリプトを実行する必要がある。
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true
+
+# CI 等で pnpm install を毎回走らせず、existing node_modules を信用する。
+verifyDepsBeforeRun: false

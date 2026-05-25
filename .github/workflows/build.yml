@@ -5,11 +5,13 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         variant:
           - { id: shiro, name: "KobitoKey Shiro" }
@@ -27,8 +29,8 @@ jobs:
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y liblzma-dev libclang-dev
 
-      - name: Install Rust nightly
-        uses: dtolnay/rust-toolchain@nightly
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
         with:
           targets: thumbv7em-none-eabihf
           components: llvm-tools
@@ -40,10 +42,11 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
+            reset/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
 
-      - name: Install tools
+      - name: Install build tools
         run: cargo install flip-link cargo-binutils cargo-hex-to-uf2
 
       - name: Build central
@@ -53,15 +56,15 @@ jobs:
         run: cargo build --release --bin peripheral
 
       - name: Build reset firmware
-        run: cd reset && cargo build --release
+        run: cargo build --release --manifest-path reset/Cargo.toml
 
       - name: Generate UF2 files
         run: |
           cargo objcopy --release --bin central -- -O ihex central.hex
           cargo objcopy --release --bin peripheral -- -O ihex peripheral.hex
+          cargo objcopy --release --manifest-path reset/Cargo.toml -- -O ihex reset.hex
           cargo hex-to-uf2 --input-path central.hex --output-path kobito-key-${{ matrix.variant.id }}-central.uf2 --family nrf52840
           cargo hex-to-uf2 --input-path peripheral.hex --output-path kobito-key-${{ matrix.variant.id }}-peripheral.uf2 --family nrf52840
-          rust-objcopy -O ihex reset/target/thumbv7em-none-eabihf/release/kobitokey-reset reset.hex
           cargo hex-to-uf2 --input-path reset.hex --output-path kobito-key-reset.uf2 --family nrf52840
 
       - name: Upload firmware artifacts

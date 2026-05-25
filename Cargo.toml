@@ -5,7 +5,7 @@ edition = "2024"
 license = "MIT"
 
 [dependencies]
-rmk = { git = "https://github.com/HaoboGu/rmk", features = [
+rmk = { git = "https://github.com/HaoboGu/rmk", rev = "bf9922b6", features = [
     "nrf52840_ble",
     "split",
     "async_matrix",

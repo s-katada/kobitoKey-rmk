@@ -1,7 +1,25 @@
+//! KobitoKey reset firmware.
+//!
+//! RMK の Storage 領域 (0x60000-0x70000, 64KB) を消去するための独立 FW。
+//! 消去対象:
+//!   - 保存済みキーマップ / Vial 設定
+//!   - BLE ペアリング情報 (split central / peripheral, host)
+//!   - その他永続化された設定
+//!
+//! 動作:
+//!   1. NVMC を Erase モードに
+//!   2. 4KB ページ x 16 = 64KB を順次消去
+//!   3. 完了後にソフトリセット
+//!
+//! Flash 手順:
+//!   - kobito-key-reset.uf2 をどちらかの XIAO BLE にドラッグ
+//!   - 自動再起動後、通常 FW を再フラッシュ
+
 #![no_main]
 #![no_std]
 
 use core::panic::PanicInfo;
+
 use cortex_m_rt::entry;
 use nrf52840_pac as _;
 
@@ -11,39 +29,25 @@ fn panic(_: &PanicInfo) -> ! {
 }
 
 const PAGE_SIZE: u32 = 4096;
+const STORAGE_START: u32 = 0x60000;
+const STORAGE_END: u32 = 0x70000;
 
-/// Reset firmware for KobitoKey.
-///
-/// Erases the RMK storage area (0x60000-0x70000) to clear:
-/// - Saved keymap / Vial settings
-/// - BLE peer addresses (split pairing)
-/// - Any other persisted configuration
-///
-/// After erasing, the keyboard reboots automatically.
-/// Flash the normal firmware (central/peripheral) again after this.
 #[entry]
 fn main() -> ! {
     let nvmc = unsafe { &*nrf52840_pac::NVMC::ptr() };
 
-    // Erase 16 pages (64KB) starting from 0x60000
-    let mut addr = 0x60000u32;
-    while addr < 0x70000 {
-        // Wait for NVMC ready
+    let mut addr = STORAGE_START;
+    while addr < STORAGE_END {
         while nvmc.ready.read().ready().is_busy() {}
 
-        // Enable erase
         nvmc.config.write(|w| w.wen().een());
 
-        // Wait for NVMC ready
         while nvmc.ready.read().ready().is_busy() {}
 
-        // Erase page
         nvmc.erasepage().write(|w| unsafe { w.bits(addr) });
 
-        // Wait for erase complete
         while nvmc.ready.read().ready().is_busy() {}
 
-        // Back to read mode
         nvmc.config.write(|w| w.wen().ren());
 
         addr += PAGE_SIZE;
