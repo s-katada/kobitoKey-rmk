@@ -1,16 +1,34 @@
 /**
- * KobitoKey 固有の設定パネル。
+ * kobitokey-specific settings panel — Phase 6.2 deliverable.
  *
- * 現状はトラックボール CPI (左右) のみ。
- * Via "Custom Value" チャネル (0xC0) を経由するが、firmware 側の
- * ハンドラ未実装のためスライダー操作は wire 上は走るものの
- * 永続化されない。下のバナーで明示する。
+ * Renders three categories from `state/kobitokeySettings.ts`:
+ *
+ *   * Trackball (CPI multiplier)
+ *   * Scroll    (throttle + per-axis invert)
+ *   * Status LED (purple hold + battery thresholds)
+ *
+ * Sliders / toggles commit through the debounced store, so a
+ * continuous slider drag results in one wire write per slot once the
+ * user lets go. Each category has a "デフォルトに戻す" button that
+ * resets just that category's values; a global reset lives in the
+ * footer.
+ *
+ * **Heads-up**: the firmware-side handler is deferred (see #39's
+ * "Deferred" section). Until it lands, slider drags update the
+ * firmware's in-memory state (RMK 0.8 stub ACKs the write) but do
+ * not persist across reboots. The panel surfaces a dismissible
+ * banner explaining this.
  */
 
 import { useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { KOBITOKEY_VALUES, type KobitokeySettingKey } from '../protocol/customValue';
-import { TRACKBALL_KEYS, useKobitokeySettingsStore } from '../state/kobitokeySettings';
+import {
+  SCROLL_KEYS,
+  STATUS_LED_KEYS,
+  TRACKBALL_KEYS,
+  useKobitokeySettingsStore,
+} from '../state/kobitokeySettings';
 
 export function KobitokeySettingsPanel() {
   const phase = useKobitokeySettingsStore((s) => s.phase);
@@ -23,7 +41,7 @@ export function KobitokeySettingsPanel() {
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
   if (phase.kind === 'empty' || phase.kind === 'loading') {
-    return <p className="text-sm text-zinc-500 dark:text-zinc-400">KobitoKey 設定を読み込み中…</p>;
+    return <p className="text-sm text-zinc-500 dark:text-zinc-400">kobitokey 設定を読み込み中…</p>;
   }
 
   const error = phase.kind === 'error' ? phase.message : null;
@@ -35,10 +53,10 @@ export function KobitokeySettingsPanel() {
     >
       <header className="px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
         <h3 id="kobitokey-settings-heading" className="text-sm font-medium">
-          KobitoKey 設定
+          kobitokey 設定
         </h3>
         <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-          トラックボールの CPI (感度)。スライダーをドラッグで即時反映。
+          トラックボール / スクロール / ステータス LED の調整。スライダーをドラッグで即時反映。
         </p>
       </header>
 
@@ -47,10 +65,16 @@ export function KobitokeySettingsPanel() {
           <div className="flex-1">
             <p className="font-medium">⚠ 開発中の機能です</p>
             <p className="text-zinc-700 dark:text-zinc-300 mt-0.5">
-              CPI 永続化には firmware 側で QMK Via Custom Value (channel 0xC0) を
-              実装する必要があります。現状の RMK スタブは ACK のみで保存はされません。
-              恒久的に変更したい場合は <code>keyboard.toml</code> の
-              <code>cpi</code> を編集して再フラッシュしてください。
+              firmware 側の Custom Vial ハンドラ (issue{' '}
+              <a
+                href="https://github.com/s-katada/kobitokey-rmk/issues/39"
+                target="_blank"
+                rel="noreferrer"
+                className="underline hover:no-underline"
+              >
+                #39
+              </a>
+              ) が完成するまで、変更は再起動を跨いで保持されない場合があります。
             </p>
           </div>
           <button
@@ -71,6 +95,20 @@ export function KobitokeySettingsPanel() {
         setValue={setValue}
         onReset={() => resetCategory(TRACKBALL_KEYS)}
       />
+      <Category
+        title="スクロール"
+        keys={SCROLL_KEYS}
+        local={local}
+        setValue={setValue}
+        onReset={() => resetCategory(SCROLL_KEYS)}
+      />
+      <Category
+        title="ステータス LED"
+        keys={STATUS_LED_KEYS}
+        local={local}
+        setValue={setValue}
+        onReset={() => resetCategory(STATUS_LED_KEYS)}
+      />
 
       <footer className="border-t border-zinc-200 dark:border-zinc-800 px-4 py-3 flex flex-wrap items-center justify-end gap-2 bg-zinc-50 dark:bg-zinc-900">
         <button
@@ -87,7 +125,7 @@ export function KobitokeySettingsPanel() {
           onClick={resetAll}
           className="rounded-md border border-zinc-300 dark:border-zinc-700 px-3 py-1.5 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-900"
         >
-          既定値に戻す
+          全て出荷時に戻す
         </button>
         {error && <div className="w-full text-sm text-rose-700 dark:text-rose-400">{error}</div>}
       </footer>
@@ -143,6 +181,27 @@ function SettingRow({ keyName, value, onChange }: SettingRowProps) {
   if (!def) return null;
   const label = LABELS[keyName];
 
+  if (def.type === 'bool') {
+    return (
+      <label className="flex items-center justify-between gap-3 text-sm">
+        <span>
+          <span className="block">{label.title}</span>
+          <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+            {label.description}
+          </span>
+        </span>
+        <input
+          type="checkbox"
+          checked={value !== 0}
+          onChange={(e) => onChange(e.target.checked ? 1 : 0)}
+          className="h-4 w-4"
+          aria-label={label.title}
+        />
+      </label>
+    );
+  }
+
+  // u8 / u16 — sliders with a numeric readout.
   return (
     <div className="space-y-1">
       <div className="flex items-baseline justify-between text-sm">
@@ -182,14 +241,51 @@ interface SettingLabel {
 }
 
 const LABELS: Record<KobitokeySettingKey, SettingLabel> = {
-  trackball_cpi_left: {
-    title: '左トラックボール CPI',
-    description: 'PMW3610 の感度 (200..3200, 200 ステップ)。値が大きいほど少ない動きでカーソルが大きく動く。',
+  trackball_cpi: {
+    title: 'CPI',
+    description: 'ポインタ感度の倍率。大きいほど動きが速くなります。',
     step: 200,
   },
-  trackball_cpi_right: {
-    title: '右トラックボール CPI',
-    description: 'PMW3610 の感度 (200..3200, 200 ステップ)。',
-    step: 200,
+  scroll_throttle_ms: {
+    title: 'スクロール間隔',
+    description: '連続スクロール報告の最小間隔。0 で制限なし。',
+    unit: ' ms',
+  },
+  scroll_invert_x: {
+    title: '横スクロール反転',
+    description: '左右のスクロール方向を入れ替えます。',
+  },
+  scroll_invert_y: {
+    title: '縦スクロール反転',
+    description: '上下のスクロール方向を入れ替えます。',
+  },
+  status_led_purple_hold_ms: {
+    title: 'パープル保持時間',
+    description: '右トラックボール操作後に LED を紫に保つ時間。0 で無効。',
+    unit: ' ms',
+    step: 50,
+  },
+  status_led_battery_high_threshold: {
+    title: 'バッテリ緑しきい値',
+    description: 'この値より上で LED が緑になります。',
+    unit: ' %',
+  },
+  status_led_battery_low_threshold: {
+    title: 'バッテリ赤しきい値',
+    description: 'この値以下で LED が赤になります。',
+    unit: ' %',
+  },
+  // Read-only display values — surfaced in `KobitokeyBatteryPanel` rather than
+  // this settings panel. Labels exist only because `LABELS` is keyed by
+  // the full `KobitokeySettingKey` union.
+  central_battery_percent: {
+    title: '左バッテリー',
+    description: 'central XIAO の LiPo 残量 (読み取り専用)。',
+    unit: ' %',
+  },
+  peripheral_battery_percent: {
+    title: '右バッテリー',
+    description: 'peripheral XIAO の LiPo 残量 (読み取り専用)。',
+    unit: ' %',
   },
 };

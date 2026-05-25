@@ -7,8 +7,11 @@ ZMK 版 [KobitoKey_QWERTY](../KobitoKey_QWERTY) からの移植。
 
 このリポジトリには 2 つのコンポーネントが含まれます:
 
-- **firmware** (ルート + `reset/`) — central / peripheral / reset firmware (Rust + RMK 0.8)
+- **firmware** (ルート + `reset/`) — central / peripheral / reset firmware (Rust + RMK 0.8.2)
 - **web** ([`web/`](./web/)) — WebHID 経由の Web キーマップエディタ (React + Vite + TS)
+
+[kobu](../kobu) firmware の機能 (status LED / 左右独立バッテリー / scroll-pointer 分離 /
+runtime tunable CPI 等) を移植済み。
 
 ## スペック
 
@@ -159,7 +162,12 @@ Shift 押下で出力反転 + Shift 自動抑制。
 | Vial | ✅ | |
 | auto-mouse layer | ❌ | RMK 未対応 (Layer 4 は手動切替) |
 | センサー回転角度 (任意角度) | ❌ | RMK は invert/swap のみ |
-| RGB LED widget | ❌ | RMK 未対応 |
+| RGB LED widget | ✅ | `src/status_led.rs` で XIAO BLE onboard RGB (P0_26/30/06) を制御。<br>battery 色 (緑/黄/赤) + 右トラックボール操作時の紫オーバーレイ + VBUS 検知 |
+| BLE Battery Service (macOS) | ✅ | BAS 1.1 (UUID 0x2BED) + 充電中アイコン対応。`build.rs` のパッチで rmk 0.8.2 を BAS v3 仕様に拡張 |
+| 左右独立バッテリー読み取り | ✅ | `src/battery_source.rs` で central/peripheral を別の atomic に分離。<br>Web UI から Custom Value channel 0xC0 で取得可能 |
+| Scroll / Pointer 分離 | ✅ | `src/trackball.rs`: 左 = ScrollProcessor (H/V → wheel), 右 = PointerProcessor (X/Y → mouse) |
+| runtime tunable settings | ✅ | `src/config.rs` で CPI / scroll / LED 閾値を atomic 化。Vial CustomGetValue ハンドラ実装済み |
+| macOS BLE 強化 | ✅ | LE 1M PHY + BLE-priority default + SAADC 40µs + DCDC reg0/reg1 + tx_power=+8dBm |
 
 ### `;` キーの完全再現方法
 
@@ -199,7 +207,8 @@ pnpm dev
 
 Chrome / Edge / Brave などの Chromium 系ブラウザで `http://localhost:5173` を開き、
 USB-C で接続したセントラル (左半身) を選択するとキーマップ・コンボ・マクロ・
-Morse・トラックボール CPI が編集できます。詳細は [`web/README.md`](./web/README.md)。
+Morse・トラックボール CPI・スクロール感度・ステータス LED 閾値・左右バッテリー残量
+が閲覧/編集できます。詳細は [`web/README.md`](./web/README.md)。
 
 ## ライセンス
 

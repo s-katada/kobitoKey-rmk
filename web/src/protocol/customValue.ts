@@ -57,20 +57,48 @@ export interface ValueDef {
   id: number;
   /** kebab-case key used by the store + UI to address the slot. */
   key:
-    | 'trackball_cpi_left'
-    | 'trackball_cpi_right';
+    | 'trackball_cpi'
+    | 'scroll_throttle_ms'
+    | 'scroll_invert_x'
+    | 'scroll_invert_y'
+    | 'status_led_purple_hold_ms'
+    | 'status_led_battery_high_threshold'
+    | 'status_led_battery_low_threshold'
+    | 'central_battery_percent'
+    | 'peripheral_battery_percent';
   type: ValueType;
-  /** Closed range `[min, max]`. UI clamps; firmware clamps again
-   *  defence-in-depth. PMW3610 valid CPI: 200..3200 (200 ステップ)。 */
+  /** Closed range `[min, max]`. The UI clamps to this; the firmware
+   *  also clamps to its own range as a defence-in-depth check. */
   min: number;
   max: number;
-  /** keyboard.toml の既定値。新規キーボードはまずこの値で読み出される。 */
+  /** Default value if the firmware doesn't respond / returns an
+   *  out-of-range value. Matches the firmware's own defaults so a
+   *  fresh keyboard reads as "untouched, ready to tune". */
   default: number;
 }
 
 export const KOBITOKEY_VALUES: readonly ValueDef[] = Object.freeze([
-  { id: 0x01, key: 'trackball_cpi_left',  type: 'u16', min: 200, max: 3200, default: 700 },
-  { id: 0x02, key: 'trackball_cpi_right', type: 'u16', min: 200, max: 3200, default: 800 },
+  { id: 0x01, key: 'trackball_cpi', type: 'u16', min: 200, max: 3200, default: 1000 },
+  { id: 0x02, key: 'scroll_throttle_ms', type: 'u8', min: 0, max: 50, default: 0 },
+  { id: 0x03, key: 'scroll_invert_x', type: 'bool', min: 0, max: 1, default: 0 },
+  { id: 0x04, key: 'scroll_invert_y', type: 'bool', min: 0, max: 1, default: 0 },
+  { id: 0x05, key: 'status_led_purple_hold_ms', type: 'u16', min: 0, max: 2000, default: 200 },
+  {
+    id: 0x06,
+    key: 'status_led_battery_high_threshold',
+    type: 'u8',
+    min: 20,
+    max: 100,
+    default: 60,
+  },
+  { id: 0x07, key: 'status_led_battery_low_threshold', type: 'u8', min: 0, max: 50, default: 20 },
+  // Read-only battery status, populated by the kobitokey firmware's bit-tag
+  // source tap (see `firmware/src/battery_source.rs`) and answered by the
+  // patched RMK `via/mod.rs` `CustomGetValue` handler. `min`/`max`/`default`
+  // are kept open so the parser's "out of range → default" guard doesn't
+  // kick in for a legitimately reported 0 % battery.
+  { id: 0x10, key: 'central_battery_percent', type: 'u8', min: 0, max: 100, default: 0 },
+  { id: 0x11, key: 'peripheral_battery_percent', type: 'u8', min: 0, max: 100, default: 0 },
 ]);
 
 export type KobitokeySettingKey = (typeof KOBITOKEY_VALUES)[number]['key'];

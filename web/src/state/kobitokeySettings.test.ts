@@ -7,6 +7,7 @@ import { useKobitokeySettingsStore } from './kobitokeySettings';
 vi.useFakeTimers();
 
 class FakeTransport {
+  // map id → stored value
   stored = new Map<number, number>();
   writes: Array<{ id: number; value: number }> = [];
 
@@ -29,6 +30,10 @@ class FakeTransport {
         } else {
           reply[3] = stored;
         }
+      } else {
+        // Match RMK 0.8 stub behaviour: leaves the buffer untouched.
+        // The store should detect "all defaults" and surface
+        // firmwareSupportsKobitokeyChannel=false.
       }
     } else if (cmd === 0x07 && def) {
       // CustomSetValue
@@ -57,13 +62,15 @@ beforeEach(() => {
 describe('attach', () => {
   it('reads every slot and reflects them in baseline + local', async () => {
     const { fake, transport } = fakeTransport();
-    fake.stored.set(0x01, 1600); // trackball_cpi_left
-    fake.stored.set(0x02, 2400); // trackball_cpi_right
+    fake.stored.set(0x01, 1600); // trackball_cpi
+    fake.stored.set(0x02, 25); // scroll_throttle_ms
+    fake.stored.set(0x03, 1); // scroll_invert_x = true
     await useKobitokeySettingsStore.getState().attach(transport);
     const s = useKobitokeySettingsStore.getState();
     expect(s.phase.kind).toBe('ready');
-    expect(s.local.trackball_cpi_left).toBe(1600);
-    expect(s.local.trackball_cpi_right).toBe(2400);
+    expect(s.local.trackball_cpi).toBe(1600);
+    expect(s.local.scroll_throttle_ms).toBe(25);
+    expect(s.local.scroll_invert_x).toBe(1);
   });
 });
 
@@ -74,22 +81,22 @@ describe('setValue', () => {
   });
 
   it('updates local immediately', () => {
-    useKobitokeySettingsStore.getState().setValue('trackball_cpi_left', 1600);
-    expect(useKobitokeySettingsStore.getState().local.trackball_cpi_left).toBe(1600);
+    useKobitokeySettingsStore.getState().setValue('trackball_cpi', 1600);
+    expect(useKobitokeySettingsStore.getState().local.trackball_cpi).toBe(1600);
   });
 
   it('clamps to the def range before storing locally', () => {
-    useKobitokeySettingsStore.getState().setValue('trackball_cpi_left', 99999);
-    expect(useKobitokeySettingsStore.getState().local.trackball_cpi_left).toBe(3200);
+    useKobitokeySettingsStore.getState().setValue('trackball_cpi', 99999);
+    expect(useKobitokeySettingsStore.getState().local.trackball_cpi).toBe(3200);
   });
 
   it('debounces wire writes (one round-trip per slot after settle)', async () => {
     const { fake, transport } = fakeTransport();
     await useKobitokeySettingsStore.getState().attach(transport);
     const store = useKobitokeySettingsStore.getState();
-    store.setValue('trackball_cpi_left', 1400);
-    store.setValue('trackball_cpi_left', 1500);
-    store.setValue('trackball_cpi_left', 1600);
+    store.setValue('trackball_cpi', 1400);
+    store.setValue('trackball_cpi', 1500);
+    store.setValue('trackball_cpi', 1600);
     expect(fake.writes).toEqual([]);
     await vi.advanceTimersByTimeAsync(200);
     expect(fake.writes).toEqual([{ id: 0x01, value: 1600 }]);
@@ -99,10 +106,8 @@ describe('setValue', () => {
     const { fake, transport } = fakeTransport();
     fake.stored.set(0x01, 1600);
     await useKobitokeySettingsStore.getState().attach(transport);
-    useKobitokeySettingsStore.getState().resetCategory(['trackball_cpi_left']);
+    useKobitokeySettingsStore.getState().resetCategory(['trackball_cpi']);
     await vi.advanceTimersByTimeAsync(200);
-    const cpiLeftDefault =
-      KOBITOKEY_VALUES.find((v) => v.key === 'trackball_cpi_left')?.default ?? 0;
-    expect(fake.writes).toEqual([{ id: 0x01, value: cpiLeftDefault }]);
+    expect(fake.writes).toEqual([{ id: 0x01, value: 1000 }]);
   });
 });

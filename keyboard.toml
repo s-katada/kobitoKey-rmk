@@ -13,8 +13,13 @@ chip = "nrf52840"
 #   combo_max_num=16 (ZMK の combos と同数)
 # --------------------------------------------------
 [rmk]
-combo_max_num = 16
+split_peripherals_num = 1
+# ZMK の bt BT_SEL 0..4 を保持するため 5。kobu は 4 だが KobitoKey 側は ZMK 互換を優先。
 ble_profiles_num = 5
+combo_max_num = 16
+morse_max_num = 8
+macro_space_size = 256
+fork_max_num = 8
 
 # --------------------------------------------------
 # Layout: 4 rows x 10 cols, 7 layers
@@ -71,10 +76,10 @@ keymap = [
     ],
     # Layer 3: Settings & Media
     [
-        ["User(0)", "User(1)", "User(2)", "User(3)", "User(4)",
+        ["User0", "User1", "User2", "User3", "User4",
                                              "MediaPrevTrack", "MediaPlayPause", "MediaNextTrack", "AudioVolDown", "AudioVolUp"],
         ["F1", "F2", "F3", "F4", "F5",       "F6", "F7", "F8", "F9", "F10"],
-        ["TO(0)", "TG(1)", "No", "No", "User(7)",
+        ["TO(0)", "TG(1)", "No", "No", "User7",
                                              "F11", "F12", "F13", "No", "_"],
         ["_",  "_",  "_",  "_",  "_",        "Delete", "_", "_", "_", "_"],
     ],
@@ -229,12 +234,52 @@ operations = [
 ]
 
 # --------------------------------------------------
-# Storage / BLE
+# Host / Vial
+#   Vial 編集の unlock chord は両手の外側 pinky (Q + P) を同時押し。
+#   matrix 位置で固定なので Vial 上で Q/P を別物に置換しても unlock は無効化されない。
+# --------------------------------------------------
+[host]
+vial_enabled = true
+unlock_keys = [[0, 0], [0, 9]]
+
+# --------------------------------------------------
+# Storage
+#   RMK 0.8 nrf52840 default は 0xA0000..0xC0000 (128KiB) だが、
+#   upstream の default 変化に追従されないように明示。
 # --------------------------------------------------
 [storage]
+enabled = true
+start_addr = 0xA0000
+num_sectors = 32
+clear_layout = false
+clear_storage = false
 
+# --------------------------------------------------
+# BLE
+#   battery_adc_pin: XIAO nRF52840 BLE 内蔵分圧 (R10=1MΩ / R11=510kΩ).
+#     ratio = 510 / 1510 ≈ 0.338 — 1/2 にすると 4.0V LiPo が 2.7V と
+#     decode され 0% 表示になる罠を回避。
+#   default_tx_power = 8: nRF52840 max。Mac 系の検出距離を底上げ。
+#
+#   [[split.*.output]] で P0_14 を Low 持続にしないと分圧パスが切れて
+#   P0_31 へ電圧が乗らない。Section は下の split.* を参照。
+# --------------------------------------------------
 [ble]
 enabled = true
+default_tx_power = 8
+battery_adc_pin = "P0_31"
+adc_divider_measured = 510
+adc_divider_total = 1510
+
+# --------------------------------------------------
+# Chip — nrf52840
+#   XIAO は LiPo 駆動。DCDC reg0/reg1 を有効化しないと BLE が弱まり
+#   macOS Bluetooth で見えないことがある (kobu 由来の知見)。
+# --------------------------------------------------
+[chip.nrf52840]
+dcdc_reg0 = true
+dcdc_reg1 = true
+dcdc_reg0_voltage = "3V3"
 
 # --------------------------------------------------
 # Split keyboard
@@ -259,9 +304,16 @@ matrix_type = "normal"
 row_pins = ["P0_03", "P0_28", "P0_29", "P1_11"]
 col_pins = ["P1_15", "P1_14", "P1_13", "P1_12", "P0_10"]
 
+# Battery sense enable: P0_14 を LOW 持続にしないと P0_31 へ分圧電圧が乗らない。
+# low_active=false + initial_state_active=false で boot 時 Level::Low に保持。
+[[split.central.output]]
+pin = "P0_14"
+low_active = false
+initial_state_active = false
+
 # 左トラックボール (central 側)
 [[split.central.input_device.pmw3610]]
-name = "trackball_left"
+name = "left"
 spi.instance = "bitbang0"
 spi.sck = "P0_05"
 spi.mosi = "P0_04"
@@ -288,9 +340,15 @@ matrix_type = "normal"
 row_pins = ["P0_03", "P0_28", "P0_29", "P1_11"]
 col_pins = ["P1_15", "P1_14", "P1_13", "P1_12", "P0_10"]
 
+# Battery sense enable for peripheral half (central と同じ)。
+[[split.peripheral.output]]
+pin = "P0_14"
+low_active = false
+initial_state_active = false
+
 # 右トラックボール (peripheral 側)
 [[split.peripheral.input_device.pmw3610]]
-name = "trackball_right"
+name = "right"
 spi.instance = "bitbang0"
 spi.sck = "P0_05"
 spi.mosi = "P0_04"

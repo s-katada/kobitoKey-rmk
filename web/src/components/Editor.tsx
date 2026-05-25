@@ -26,6 +26,7 @@ import { ComboEditor } from './ComboEditor';
 import { EditorToolbar } from './EditorToolbar';
 import { KeycodePicker } from './KeycodePicker';
 import { KeymapView } from './KeymapView';
+import { KobitokeyBatteryPanel } from './KobitokeyBatteryPanel';
 import { KobitokeySettingsPanel } from './KobitokeySettingsPanel';
 import { MacroEditor } from './MacroEditor';
 import { MorseEditor } from './MorseEditor';
@@ -163,6 +164,8 @@ export function Editor() {
       <ComboEditor definition={definition} layerCount={dimensions.layers} />
 
       <MorseEditor definition={definition} layerCount={dimensions.layers} />
+
+      <KobitokeyBatteryPanel />
 
       <KobitokeySettingsPanel />
     </section>

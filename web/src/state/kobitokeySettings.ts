@@ -171,7 +171,21 @@ export const useKobitokeySettingsStore = create<KobitokeySettingsState>((set, ge
 
 // ─── Categorisation helpers (UI uses these) ──────────────────────────
 
-export const TRACKBALL_KEYS: readonly KobitokeySettingKey[] = [
-  'trackball_cpi_left',
-  'trackball_cpi_right',
+export const TRACKBALL_KEYS: readonly KobitokeySettingKey[] = ['trackball_cpi'];
+export const SCROLL_KEYS: readonly KobitokeySettingKey[] = [
+  'scroll_throttle_ms',
+  'scroll_invert_x',
+  'scroll_invert_y',
+];
+export const STATUS_LED_KEYS: readonly KobitokeySettingKey[] = [
+  'status_led_purple_hold_ms',
+  'status_led_battery_high_threshold',
+  'status_led_battery_low_threshold',
+];
+/// Read-only display values populated by the firmware's bit-tag battery
+/// source tap. UI components surface these in a dedicated battery panel
+/// rather than mixing them in with the editable settings categories above.
+export const BATTERY_KEYS: readonly KobitokeySettingKey[] = [
+  'central_battery_percent',
+  'peripheral_battery_percent',
 ];
